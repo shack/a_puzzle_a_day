@@ -170,5 +170,6 @@ assert 0 <= month < 12
 board[month // 6][month % 6] = 'M'
 board[2 + day // 7][day % 7] = 'D'
 
-for _, sol in zip(range(args.solutions), solver(board)):
+for i, (_, sol) in enumerate(zip(range(args.solutions), solver(board))):
+    print(f'#{i + 1}:')
     print_board(sol)
