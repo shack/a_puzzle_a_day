@@ -124,12 +124,13 @@ def solver_dfs(b):
         for r, c in product(iter_r(b), iter_c(b)):
             for p in positions[i]:
                 occ = fit(b, p, r, c)
-                if occ:
-                    for rr, cc in occ:
-                        b[rr][cc] = piece_id(p)
-                    yield from dfs(b, i + 1)
-                    for rr, cc in occ:
-                        b[rr][cc] = '.'
+                if not occ:
+                    continue
+                for rr, cc in occ:
+                    b[rr][cc] = piece_id(p)
+                yield from dfs(b, i + 1)
+                for rr, cc in occ:
+                    b[rr][cc] = '.'
     yield from dfs(b, 0)
 
 prefix = 'solver_'
