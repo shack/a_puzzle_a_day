@@ -146,7 +146,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('-d', '--day', type=int, action='store', help='day (1-31)')
 parser.add_argument('-m', '--month', type=int, action='store', help='month (1-12)')
-parser.add_argument('-n', '--solutions', type=int, action='store', default=1, help='number of solutions')
+parser.add_argument('-n', '--solutions', type=int, action='store', default=1000, help='number of solutions')
 parser.add_argument('-s', '--solver', help='specify solver (default: dfs)')
 parser.add_argument('-l', '--list', action='store_true', help='list solvers')
 
