@@ -4,40 +4,14 @@ import sys
 from itertools import product
 
 pieces = [
-    [
-        'F..',
-        'F..',
-        'FFF'
-    ],
-    [
-        'TTTT',
-        '.T..'
-    ],
-    [
-        'SS..',
-        '.SSS'
-    ],
-    [
-        'QQQ',
-        'QQQ'
-    ],
-    [
-        'Z..',
-        'ZZZ',
-        '..Z'
-    ],
-    [
-        'L...',
-        'LLLL'
-    ],
-    [
-        'U.U',
-        'UUU'
-    ],
-    [
-        'BB.',
-        'BBB'
-    ]
+    [ 'F..', 'F..', 'FFF' ],
+    [ 'TTTT', '.T..' ],
+    [ 'SS..', '.SSS' ],
+    [ 'QQQ', 'QQQ' ],
+    [ 'Z..', 'ZZZ', '..Z' ],
+    [ 'L...', 'LLLL' ],
+    [ 'U.U', 'UUU' ],
+    [ 'BB.', 'BBB' ]
 ]
 
 def piece_id(piece):
@@ -50,22 +24,18 @@ def piece_positions(piece):
         return [''.join(row) for row in zip(*piece)]
     def rotate(piece):
         return transpose(flip(piece))
-    res = set()
     for p in [piece, flip(piece)]:
         for _ in range(4):
-            res.add(tuple(p))
+            yield tuple(p)
             p = rotate(p)
-    return res
 
-positions = [ piece_positions(p) for p in pieces ]
+positions = [ set(x for x in piece_positions(p)) for p in pieces ]
 
 colors = [
     'red', 'green', 'blue', 'yellow', 'magenta', 'cyan', 'white', 'dark_grey'
 ]
-
-color_map = { piece_id(p): c for p, c in zip(pieces, colors) }
-
 assert len(pieces) <= len(colors)
+color_map = { piece_id(p): c for p, c in zip(pieces, colors) }
 
 board = [
     '......#',
