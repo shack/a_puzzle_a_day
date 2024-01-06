@@ -54,6 +54,9 @@ def iter_r(board):
 def iter_c(board):
     return range(len(board[0]))
 
+def iter_rc(board):
+    return product(iter_r(board), iter_c(board))
+
 blk_str = lambda p: p + p
 if sys.stdout.isatty():
     try:
@@ -73,20 +76,17 @@ def print_board(board):
         print(''.join(cell_str(p) for p in row))
 
 def fit(board, piece, r, c):
-    W = len(board[0])
-    H = len(board)
+    if r + len(piece) > len(board) or c + len(piece[0]) > len(board[0]):
+        return []
     occ = []
-    for dr in iter_r(piece):
+    for dr, dc in iter_rc(piece):
         rr = r + dr
-        for dc in iter_c(piece):
-            cc = c + dc
-            if not (0 <= rr < H and 0 <= cc < W):
+        cc = c + dc
+        if piece[dr][dc] != '.':
+            if board[rr][cc] != '.':
                 return []
-            if piece[dr][dc] != '.':
-                if board[rr][cc] != '.':
-                    return []
-                else:
-                    occ += [ (rr, cc) ]
+            else:
+                occ += [ (rr, cc) ]
     return occ
 
 try:
@@ -99,20 +99,24 @@ try:
         def clause(piece, k, r, c):
             r = [ var(r, c) == k for r, c in fit(b, piece, r, c) ]
             return And(r) if r else BoolVal(False)
+        def get(r, c):
+            v = m[var(r, c)]
+            return str(v) if not v is None else b[r][c]
 
         sort, kinds = EnumSort('Occ', [ piece_id(p) for p in pieces ])
         s = SolverFor('QF_FD')
         for pos, kind in zip(positions, kinds):
             s.add(Or([ clause(p, kind, r, c) \
-                        for r in iter_r(b) \
-                        for c in iter_c(b) \
+                        for r, c in iter_rc(b) \
                         for p in pos]))
-        assert s.check() == sat
-        m = s.model()
-        def get(r, c):
-            v = m[var(r, c)]
-            return str(v) if not v is None else b[r][c]
-        yield [ ''.join(str(get(r, c)) for c in iter_c(b)) for r in iter_r(b) ]
+
+        while s.check() == sat:
+            m = s.model()
+            yield [ ''.join(str(get(r, c)) for c in iter_c(b)) \
+                    for r in iter_r(b) ]
+            this = And([ var(r, c) == m[var(r, c)] \
+                         for r, c in iter_rc(b) if m[var(r, c)] != None])
+            s.add(Not(this))
 except ImportError:
     pass
 
@@ -121,7 +125,7 @@ def solver_dfs(b):
         if i == len(pieces):
             yield b
             return
-        for r, c in product(iter_r(b), iter_c(b)):
+        for r, c in iter_rc(b):
             for p in positions[i]:
                 occ = fit(b, p, r, c)
                 if not occ:
